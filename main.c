@@ -63,8 +63,9 @@ int8_t horizontal;
 uint8_t button_mask;
 
 void hid_task(void);
-void enc_a_changed(uint gpio, uint32_t events);
-void enc_b_changed(uint gpio, uint32_t events);
+void enc_a_changed();
+void enc_b_changed();
+void irq_callback(uint gpio, uint32_t events);
 
 /*------------- MAIN -------------*/
 int main(void)
@@ -82,10 +83,14 @@ int main(void)
 
   // A phase
   gpio_init(18);
-  gpio_set_irq_enabled_with_callback(18, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, enc_a_changed);
+  gpio_set_dir(18, GPIO_IN);
+  gpio_pull_up(18);
+  gpio_set_irq_enabled_with_callback(18, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, irq_callback);
   // B phase
   gpio_init(10);
-  gpio_set_irq_enabled_with_callback(10, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, enc_b_changed);
+  gpio_set_dir(10, GPIO_IN);
+  gpio_pull_up(10);
+  gpio_set_irq_enabled_with_callback(10, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, irq_callback);
 
   adns5050_init(&adns5050, 16, 14, 9);
   gpio_init(12);
@@ -277,7 +282,7 @@ void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_
   }
 }
 
-void enc_a_changed(uint gpio, uint32_t events)
+void enc_a_changed()
 {
   uint8_t prev = encoder & 0b11;
 
@@ -302,7 +307,7 @@ void enc_a_changed(uint gpio, uint32_t events)
   }
 }
 
-void enc_b_changed(uint gpio, uint32_t events)
+void enc_b_changed()
 {
   uint8_t prev = encoder & 0b11;
 
@@ -324,5 +329,15 @@ void enc_b_changed(uint gpio, uint32_t events)
   case 0b0001:
     vertical--;
     break;
+  }
+}
+
+void irq_callback(uint gpio, uint32_t events)
+{
+  if (gpio == 18) {
+    enc_a_changed();
+  }
+  else if (gpio == 10) {
+    enc_b_changed();
   }
 }
