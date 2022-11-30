@@ -39,21 +39,6 @@
 // MACRO CONSTANT TYPEDEF PROTYPES
 //--------------------------------------------------------------------+
 
-/* Blink pattern
- * - 250 ms  : device not mounted
- * - 1000 ms : device mounted
- * - 2500 ms : device is suspended
- */
-enum
-{
-  BLINK_NOT_MOUNTED = 250,
-  BLINK_MOUNTED = 1000,
-  BLINK_SUSPENDED = 2500,
-};
-
-#define ENC_A 2
-#define ENC_B 6
-
 adns5050_t adns5050;
 int8_t delta_x;
 int8_t delta_y;
@@ -63,8 +48,8 @@ int8_t horizontal;
 uint8_t button_mask;
 
 void hid_task(void);
-void enc_a_changed();
-void enc_b_changed();
+void enc_a_changed(void);
+void enc_b_changed(void);
 void irq_callback(uint gpio, uint32_t events);
 
 /*------------- MAIN -------------*/
@@ -282,7 +267,7 @@ void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_
   }
 }
 
-void enc_a_changed()
+void enc_a_changed(void)
 {
   uint8_t prev = encoder & 0b11;
 
@@ -307,7 +292,7 @@ void enc_a_changed()
   }
 }
 
-void enc_b_changed()
+void enc_b_changed(void)
 {
   uint8_t prev = encoder & 0b11;
 
