@@ -69,12 +69,12 @@ int main(void)
   // A phase
   gpio_init(18);
   gpio_set_dir(18, GPIO_IN);
-  gpio_pull_up(18);
+  gpio_pull_down(18);
   gpio_set_irq_enabled_with_callback(18, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, irq_callback);
   // B phase
   gpio_init(10);
   gpio_set_dir(10, GPIO_IN);
-  gpio_pull_up(10);
+  gpio_pull_down(10);
   gpio_set_irq_enabled_with_callback(10, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, irq_callback);
 
   adns5050_init(&adns5050, 16, 14, 9);
