@@ -48,8 +48,6 @@ int8_t horizontal;
 uint8_t button_mask;
 
 void hid_task(void);
-void enc_a_changed(void);
-void enc_b_changed(void);
 void irq_callback(uint gpio, uint32_t events);
 
 /*------------- MAIN -------------*/
@@ -70,7 +68,6 @@ int main(void)
   gpio_init(18);
   gpio_set_dir(18, GPIO_IN);
   gpio_pull_down(18);
-  gpio_set_irq_enabled_with_callback(18, GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL, true, irq_callback);
   // B phase
   gpio_init(10);
   gpio_set_dir(10, GPIO_IN);
@@ -267,42 +264,20 @@ void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_
   }
 }
 
-void enc_a_changed(void)
-{
-  uint16_t prev = encoder & 0b11;
-
-  // An-1:Bn-1:An:Bn
-  encoder <<= 2;
-  encoder |= (prev ^ 0b10);
-
-  if ((encoder & 0b1111111111) == 0b0001111000)
-  {
-    vertical++;
-  }
-}
-
-void enc_b_changed(void)
-{
-  uint16_t prev = encoder & 0b11;
-
-  // An-1:Bn-1:An:Bn
-  encoder <<= 2;
-  encoder |= (prev ^ 0b01);
-
-  if ((encoder & 0b1111111111) == 0b0010110100)
-  {
-    vertical--;
-  }
-}
-
 void irq_callback(uint gpio, uint32_t events)
 {
-  switch (gpio) {
-  case 18:
-    enc_a_changed();
-    break;
-  case 10:
-    enc_b_changed();
-    break;
+  if (gpio == 10) {
+    if (events & GPIO_IRQ_EDGE_RISE) {
+      if (gpio_get(18))
+        vertical++;
+      else
+        vertical--;
+    }
+    else if (events & GPIO_IRQ_EDGE_FALL){
+      if (gpio_get(18))
+        vertical--;
+      else
+        vertical++;
+    }
   }
 }
