@@ -42,7 +42,7 @@
 adns5050_t adns5050;
 int8_t delta_x;
 int8_t delta_y;
-uint8_t encoder;
+uint16_t encoder;
 int8_t vertical;
 int8_t horizontal;
 uint8_t button_mask;
@@ -269,60 +269,40 @@ void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_
 
 void enc_a_changed(void)
 {
-  uint8_t prev = encoder & 0b11;
+  uint16_t prev = encoder & 0b11;
 
   // An-1:Bn-1:An:Bn
   encoder <<= 2;
   encoder |= (prev ^ 0b10);
 
-  switch (encoder & 0b1111)
+  if ((encoder & 0b1111111111) == 0b0001111000)
   {
-  // A:Low->High, B:Low
-  case 0b0010:
-  // A:High->Low, B:High
-  case 0b1101:
     vertical++;
-    break;
-  // A:Low->High, B:High
-  case 0b0111:
-  // A:High->Low, B:Low
-  case 0b1000:
-    vertical--;
-    break;
   }
 }
 
 void enc_b_changed(void)
 {
-  uint8_t prev = encoder & 0b11;
+  uint16_t prev = encoder & 0b11;
 
   // An-1:Bn-1:An:Bn
   encoder <<= 2;
   encoder |= (prev ^ 0b01);
 
-  switch (encoder & 0b1111)
+  if ((encoder & 0b1111111111) == 0b0010110100)
   {
-  // A:High, B:Low->High
-  case 0b1011:
-  // A:Low, B:High->Low
-  case 0b0100:
-    vertical++;
-    break;
-  // A:High, B:High->Low
-  case 0b1110:
-  // A:Low, B:Low->High
-  case 0b0001:
     vertical--;
-    break;
   }
 }
 
 void irq_callback(uint gpio, uint32_t events)
 {
-  if (gpio == 18) {
+  switch (gpio) {
+  case 18:
     enc_a_changed();
-  }
-  else if (gpio == 10) {
+    break;
+  case 10:
     enc_b_changed();
+    break;
   }
 }
