@@ -136,13 +136,13 @@ void hid_task(void)
   delta_x -= adns5050_read(&adns5050, ADNS5050_DELTA_Y_REG);
 
   if (gpio_get(20) == 0)
-    button_mask |= MOUSE_BUTTON_LEFT;
-  else
-    button_mask &= ~MOUSE_BUTTON_LEFT;
-  if (gpio_get(11) == 0)
     button_mask |= MOUSE_BUTTON_RIGHT;
   else
     button_mask &= ~MOUSE_BUTTON_RIGHT;
+  if (gpio_get(11) == 0)
+    button_mask |= MOUSE_BUTTON_LEFT;
+  else
+    button_mask &= ~MOUSE_BUTTON_LEFT;
 
   if (board_millis() - start_ms < interval_ms)
     return; // not enough time
